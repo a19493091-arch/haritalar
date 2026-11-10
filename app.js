@@ -92,6 +92,59 @@ const stripAccents = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/
 
 function course() { return COURSES[state.lang]; }
 
+/* ---------- İkonlar ve maskot ---------- */
+const ICONS = {
+  flame: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c1 3.5 5 6 5 11a5 5 0 0 1-10 0c0-2.2 1-3.8 2.3-5 .2 1.6 1 2.7 2.2 3.2C11 8.5 11.2 5 12 2z"/></svg>',
+  bolt: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.5 2 4 14h7l-1.5 8L20 10h-7z"/></svg>',
+  heart: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 21s-8-5.3-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.7-8 11-8 11z"/></svg>',
+  sound: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 9h4l5-4v14l-5-4H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>',
+  mute: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 9h4l5-4v14l-5-4H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="m16 9 5 6m0-6-5 6"/></svg>',
+  star: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="m12 2.5 2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>',
+  check: '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+  lock: '<svg viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="currentColor"/><path fill="none" stroke="currentColor" stroke-width="2.5" d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>',
+  dumbbell: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M2 10h2V8h3v8H4v-2H2zm20 0h-2V8h-3v8h3v-2h2zM8 11h8v2H8z"/></svg>',
+};
+const icon = (name) => { const s = document.createElement("span"); s.style.display = "contents"; s.innerHTML = ICONS[name]; return s; };
+
+function fox(mood = "happy") {
+  const eyes = mood === "sad"
+    ? '<path d="M38 66q6-5 12 0M70 66q6-5 12 0" stroke="#1d2340" stroke-width="4" fill="none" stroke-linecap="round"/>'
+    : mood === "joy"
+    ? '<path d="M38 66q6-8 12 0M70 66q6-8 12 0" stroke="#1d2340" stroke-width="4" fill="none" stroke-linecap="round"/>'
+    : '<circle cx="44" cy="64" r="5.5" fill="#1d2340"/><circle cx="76" cy="64" r="5.5" fill="#1d2340"/><circle cx="46" cy="62" r="1.8" fill="#fff"/><circle cx="78" cy="62" r="1.8" fill="#fff"/>';
+  const mouth = mood === "sad"
+    ? '<path d="M53 96q7-5 14 0" stroke="#1d2340" stroke-width="3" fill="none" stroke-linecap="round"/>'
+    : '<path d="M52 92q8 7 16 0" stroke="#1d2340" stroke-width="3" fill="none" stroke-linecap="round"/>';
+  const d = document.createElement("div");
+  d.className = "fox";
+  d.setAttribute("aria-hidden", "true");
+  d.innerHTML = `<svg viewBox="0 0 120 120">
+    <ellipse cx="60" cy="112" rx="34" ry="5" fill="#000" opacity=".08"/>
+    <path d="M20 14 50 42 28 62Z" fill="#ff7a2f"/><path d="M100 14 70 42 92 62Z" fill="#ff7a2f"/>
+    <path d="M27 25 42 41 32 51Z" fill="#7a2e0c"/><path d="M93 25 78 41 88 51Z" fill="#7a2e0c"/>
+    <path d="M60 34c30 0 46 17 46 36 0 14-20 32-46 38-26-6-46-24-46-38 0-19 16-36 46-36Z" fill="#ff7a2f"/>
+    <path d="M60 64c10 10 28 12 42 7-6 18-24 30-42 35-18-5-36-17-42-35 14 5 32 3 42-7Z" fill="#fff"/>
+    ${eyes}
+    <ellipse cx="60" cy="84" rx="7" ry="5" fill="#1d2340"/>
+    ${mouth}
+    <circle cx="30" cy="80" r="6" fill="#ff9aa5" opacity=".55"/><circle cx="90" cy="80" r="6" fill="#ff9aa5" opacity=".55"/>
+  </svg>`;
+  return d;
+}
+
+/* ---------- Onay penceresi (tarayıcı confirm() yerine) ---------- */
+function askConfirm(title, text, yesLabel, noLabel, onYes) {
+  const bg = el("div", { class: "modal-bg", role: "dialog", "aria-modal": "true" });
+  const close = () => bg.remove();
+  const keep = el("button", { class: "btn", type: "button", onclick: close }, noLabel);
+  bg.append(el("div", { class: "modal" },
+    fox("sad"), el("h2", {}, title), el("p", {}, text), keep,
+    el("button", { class: "btn ghost", type: "button", onclick: () => { close(); onYes(); } }, yesLabel)));
+  bg.addEventListener("click", (e) => { if (e.target === bg) close(); });
+  document.body.append(bg);
+  keep.focus();
+}
+
 /* ---------- Ses ---------- */
 let audioCtx = null;
 function beep(freqs, type = "sine", dur = 0.12) {
@@ -131,8 +184,8 @@ function speak(text, slow = false) {
   if (voice) u.voice = voice;
   speechSynthesis.speak(u);
 }
-const speakBtn = (text, label = "🔊") =>
-  el("button", { class: "speak", type: "button", title: "Dinle", onclick: (e) => { e.stopPropagation(); speak(text); } }, label);
+const speakBtn = (text) =>
+  el("button", { class: "speak", type: "button", title: "Dinle", "aria-label": "Dinle", onclick: (e) => { e.stopPropagation(); speak(text); } }, icon("sound"));
 
 /* ---------- Alıştırma üreticileri ---------- */
 // Her alıştırma: { type, prompt, render(container, setAnswer), check(answer) -> {ok, correct, note} }
@@ -151,7 +204,7 @@ function makePickWord(unit, toTarget) {
     .filter((w) => w !== answer);
   const options = shuffle([answer, ...sample([...new Set(pool)], 3)]);
   return {
-    type: "pick",
+    type: "pick", kind: "Yeni kelime",
     title: toTarget ? `“${tr}” nasıl denir?` : "Bu kelimenin anlamı ne?",
     solution: answer,
     render(box, setAnswer) {
@@ -187,18 +240,18 @@ function makeBank(sentence, toTarget, listen = false) {
   const tiles = shuffle([...answerTokens, ...sample(pool, Math.min(4, Math.max(2, 7 - answerTokens.length)))]);
 
   return {
-    type: listen ? "listen" : "bank",
+    type: listen ? "listen" : "bank", kind: listen ? "Dinleme" : toTarget ? "Çeviri" : "Anlama",
     title: listen ? "Duyduğunu yaz" : "Bu cümleyi çevir",
     solution: target,
     render(box, setAnswer) {
       if (listen) {
         box.append(el("div", { class: "listen-row" },
-          el("button", { class: "big-speak", type: "button", onclick: () => speak(tg) }, "🔊"),
-          el("button", { class: "slow-speak", type: "button", onclick: () => speak(tg, true) }, "🐢")));
+          el("button", { class: "big-speak", type: "button", "aria-label": "Dinle", onclick: () => speak(tg) }, icon("sound")),
+          el("button", { class: "slow-speak", type: "button", onclick: () => speak(tg, true) }, "YAVAŞ")));
         setTimeout(() => speak(tg), 300);
       } else {
         box.append(el("div", { class: "bubble-row" },
-          el("div", { class: "mascot" }, "🦊"),
+          fox(),
           el("div", { class: "bubble" }, toTarget ? null : speakBtn(tg), source)));
         if (!toTarget) setTimeout(() => speak(tg), 300);
       }
@@ -241,7 +294,7 @@ function makeBank(sentence, toTarget, listen = false) {
 function makeType(unit) {
   const [tr, tg] = pick(unit.words);
   return {
-    type: "type",
+    type: "type", kind: "Yazma",
     title: `“${tr}” kelimesini ${course().name} yaz`,
     solution: tg,
     render(box, setAnswer) {
@@ -266,7 +319,7 @@ function makeType(unit) {
 function makeMatch(unit) {
   const pairs = sample(unit.words, 5);
   return {
-    type: "match",
+    type: "match", kind: "Eşleştirme",
     title: "Eşleşen çiftlere dokun",
     solution: null,
     autoCheck: true,
@@ -366,78 +419,102 @@ function render() {
 }
 
 function renderLanguagePicker() {
+  const hellos = ["Hello", "Hallo", "Hola", "Merhaba"];
   app.replaceChildren(
-    el("div", { class: "screen center" },
-      el("div", { class: "logo" }, "🦊 Kelimo"),
+    el("div", { class: "screen center welcome" },
+      fox(),
+      el("div", { class: "brand" }, "Kelimo"),
       el("h1", {}, "Hangi dili öğrenmek istersin?"),
+      el("p", {}, "Günde birkaç dakika, kısa derslerle. İstediğin zaman dil değiştirebilirsin."),
       el("div", { class: "lang-grid" },
-        Object.entries(COURSES).map(([code, c]) =>
-          el("button", { class: "lang-card", type: "button", onclick: () => { state.lang = code; render(); } },
-            el("span", { class: "flag" }, c.flag), c.name,
-            el("small", {}, `${c.units.length} ünite`))))));
+        Object.entries(COURSES).map(([code, c]) => {
+          const done = state.progress[code] || 0;
+          const total = c.units.length * LESSONS_PER_UNIT;
+          return el("button", { class: "lang-card", type: "button", onclick: () => { state.lang = code; render(); } },
+            el("span", { class: "flag" }, c.flag),
+            el("strong", {}, c.name),
+            el("small", {}, done ? `${done}/${total} ders tamamlandı` : `${c.units.length} ünite · ${total} ders`));
+        })),
+      el("div", { class: "hello-strip" }, hellos.map((h) => el("span", {}, h)))));
 }
 
 function heartTimerText() {
   if (state.hearts >= MAX_HEARTS) return "Kalplerin dolu";
   const left = HEART_REFILL_MS - (Date.now() - state.heartsUpdatedAt);
   const m = Math.max(0, Math.ceil(left / 60000));
-  return `Sonraki kalp: ${m} dk`;
+  return `Sonraki kalp ${m} dk sonra`;
 }
 
 function topBar() {
   const c = course();
+  const activeToday = state.lastActiveDay === todayKey();
   return el("header", { class: "topbar" },
-    el("button", { class: "stat flag-btn", type: "button", title: "Dil değiştir", onclick: () => { state.lang = null; render(); } }, c.flag),
-    el("div", { class: "stat streak", title: "Seri" }, "🔥 ", String(state.streak)),
-    el("div", { class: "stat xp", title: "Toplam XP" }, "⚡ ", String(state.xp)),
-    el("div", { class: "stat hearts", title: heartTimerText() }, "❤️ ", String(state.hearts)),
-    el("button", { class: "stat", type: "button", title: "Ses", onclick: () => { state.sound = !state.sound; render(); } }, state.sound ? "🔔" : "🔕"));
+    el("button", { class: "stat flag-btn", type: "button", title: "Dil değiştir", "aria-label": "Dil değiştir", onclick: () => { state.lang = null; render(); } }, c.flag),
+    el("div", { class: `stat st-streak${activeToday ? "" : " st-off"}`, title: "Gün serisi" }, icon("flame"), String(state.streak)),
+    el("div", { class: "stat st-xp", title: "Toplam XP" }, icon("bolt"), String(state.xp)),
+    el("div", { class: "stat st-hearts", title: heartTimerText() }, icon("heart"), String(state.hearts)),
+    el("button", { class: "stat", type: "button", title: "Ses efektleri", "aria-label": "Ses efektleri",
+      onclick: () => { state.sound = !state.sound; render(); } }, icon(state.sound ? "sound" : "mute")));
+}
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 11) return "Günaydın!";
+  if (h < 18) return "İyi günler!";
+  return "İyi akşamlar!";
 }
 
 function renderHome() {
   const c = course();
   const done = state.progress[state.lang] || 0;
   const goalPct = Math.min(100, Math.round((state.xpToday / DAILY_GOAL) * 100));
+  const left = Math.max(0, DAILY_GOAL - state.xpToday);
+
+  const hero = el("section", { class: "hero" },
+    fox(goalPct >= 100 ? "joy" : "happy"),
+    el("div", { style: "min-width:0" },
+      el("h2", {}, greeting()),
+      el("p", {}, left > 0 ? `Günlük hedefe ${left} XP kaldı. ${heartTimerText()}.` : "Bugünkü hedefini tamamladın. Harika gidiyorsun!"),
+      el("div", { class: "hero-actions" },
+        el("button", { class: "btn sky small", type: "button", disabled: done === 0,
+          title: done === 0 ? "Önce bir ders bitir" : "Öğrendiklerini tekrar et, 1 kalp kazan",
+          onclick: () => startLesson({ practice: true }) }, "Pratik yap +1 kalp"))),
+    el("div", { class: "ring", style: `--p:${goalPct}`, title: "Günlük hedef" },
+      el("div", {}, el("span", {}, `${state.xpToday}`), el("small", {}, `/ ${DAILY_GOAL} XP`))));
 
   const path = el("div", { class: "path" });
   let globalIdx = 0;
-  const offsets = [0, 60, 90, 60, 0, -60, -90, -60];
+  const offsets = [0, 52, 78, 52, 0, -52, -78, -52];
   c.units.forEach((unit, ui) => {
+    const unitDone = Math.min(LESSONS_PER_UNIT, Math.max(0, done - ui * LESSONS_PER_UNIT));
     path.append(el("div", { class: `unit-banner u${ui % 5}` },
-      el("div", {}, el("small", {}, `Ünite ${ui + 1}`), el("h2", {}, unit.title)),
-      el("span", { class: "unit-icon" }, unit.icon)));
+      el("div", { style: "position:relative;z-index:1;min-width:0" },
+        el("div", { class: "eyebrow" }, `Ünite ${ui + 1}`),
+        el("h2", {}, unit.title),
+        el("div", { class: "unit-prog" }, `${unitDone}/${LESSONS_PER_UNIT} ders · ${unit.words.length} kelime`)),
+      el("span", { class: "unit-icon", "aria-hidden": "true" }, unit.icon)));
     for (let li = 0; li < LESSONS_PER_UNIT; li++, globalIdx++) {
       const status = globalIdx < done ? "done" : globalIdx === done ? "current" : "locked";
       const idx = globalIdx;
+      const x = offsets[idx % offsets.length];
       const node = el("button", {
-        class: `node ${status} u${ui % 5}`, type: "button",
-        style: `transform: translateX(${offsets[idx % offsets.length]}px)`,
+        class: `node ${status}`, type: "button",
         disabled: status === "locked",
-        "aria-label": `Ünite ${ui + 1}, ders ${li + 1}`,
+        "aria-label": `Ünite ${ui + 1}, ders ${li + 1}${status === "done" ? " (tamamlandı)" : status === "locked" ? " (kilitli)" : ""}`,
         onclick: () => startLesson({ unitIdx: ui, lessonIdx: li, globalIdx: idx }),
-      }, status === "done" ? "✓" : status === "locked" ? "🔒" : "★");
-      const wrap = el("div", { class: "node-wrap" }, node);
-      if (status === "current") wrap.prepend(el("div", { class: "start-tip", style: `transform: translateX(${offsets[idx % offsets.length]}px)` }, "BAŞLA"));
+      }, icon(status === "done" ? "check" : status === "locked" ? "lock" : "star"));
+      const wrap = el("div", { class: `node-wrap u${ui % 5}${status === "current" ? " is-current" : ""}`, style: `transform: translateX(${x}px)` }, node);
+      if (status === "current") wrap.prepend(el("div", { class: "start-tip" }, done === 0 ? "BAŞLA" : "SIRADAKİ"));
       path.append(wrap);
     }
   });
   const total = c.units.length * LESSONS_PER_UNIT;
-  if (done >= total) path.append(el("div", { class: "trophy" }, "🏆", el("p", {}, "Kursu tamamladın! Pratik yapmaya devam et.")));
+  if (done >= total) path.append(el("div", { class: "trophy" },
+    el("div", { class: "cup" }, "🏆"), el("h2", {}, "Kursu tamamladın!"), el("p", {}, "Pratik yaparak kelimeleri taze tut.")));
 
-  app.replaceChildren(
-    el("div", { class: "screen home" },
-      topBar(),
-      el("section", { class: "cards" },
-        el("div", { class: "card goal" },
-          el("div", { class: "card-title" }, "🎯 Günlük hedef"),
-          el("div", { class: "bar" }, el("div", { class: "fill", style: `width:${goalPct}%` })),
-          el("small", {}, `${state.xpToday} / ${DAILY_GOAL} XP`)),
-        el("div", { class: "card" },
-          el("div", { class: "card-title" }, "❤️ Kalpler"),
-          el("small", {}, heartTimerText()),
-          el("button", { class: "btn secondary small", type: "button", disabled: done === 0,
-            onclick: () => startLesson({ practice: true }) }, "Pratik yap (+1 ❤️)"))),
-      path));
+  app.replaceChildren(el("div", { class: "screen home" }, topBar(), hero, path));
+  const cur = $(".node.current");
+  if (cur && done > 0) cur.scrollIntoView({ block: "center" });
 }
 
 /* ---------- Ders akışı ---------- */
@@ -450,12 +527,13 @@ function startLesson(meta) {
 }
 
 function renderNoHearts() {
+  app.onkeydown = null;
   app.replaceChildren(
     el("div", { class: "screen center" },
-      el("div", { class: "big-emoji" }, "💔"),
+      fox("sad"),
       el("h1", {}, "Kalbin kalmadı"),
-      el("p", {}, heartTimerText() + ". Pratik yaparak kalp kazanabilirsin."),
-      el("button", { class: "btn", type: "button", onclick: () => startLesson({ practice: true }) }, "Pratik yap"),
+      el("p", {}, `${heartTimerText()}. Beklemek istemiyorsan pratik yap; her pratik 1 kalp kazandırır.`),
+      el("button", { class: "btn sky", type: "button", onclick: () => startLesson({ practice: true }) }, "Pratik yap"),
       el("button", { class: "btn ghost", type: "button", onclick: render }, "Ana sayfa")));
 }
 
@@ -497,7 +575,7 @@ function nextExercise(session) {
         state.hearts = Math.max(0, state.hearts - 1);
         if (state.hearts === MAX_HEARTS - 1) state.heartsUpdatedAt = Date.now();
         saveState();
-        $(".lesson-hearts").textContent = `❤️ ${state.hearts}`;
+        $(".lesson-hearts .hc").textContent = String(state.hearts);
       }
       session.queue.push(ex); // yanlış yapılan soru sona eklenir
     }
@@ -505,13 +583,13 @@ function nextExercise(session) {
     const outOfHearts = !res.ok && !session.meta.practice && state.hearts <= 0;
     const fb = el("footer", { class: `lesson-footer feedback ${res.ok ? "ok" : "bad"}` },
       el("div", { class: "fb-text" },
-        el("strong", {}, res.ok ? `✅ ${praise}` : "❌ Doğru cevap:"),
+        el("strong", {}, res.ok ? praise : "Doğru cevap:"),
         !res.ok && res.correct ? el("div", {}, res.correct) : null,
         res.note ? el("div", { class: "note" }, res.note) : null,
-        res.ok && session.combo >= 3 ? el("div", { class: "note" }, `🔥 ${session.combo} doğru üst üste!`) : null),
+        res.ok && session.combo >= 3 ? el("div", { class: "note" }, `${session.combo} doğru üst üste!`) : null),
       el("button", { class: "btn", type: "button", onclick: () => outOfHearts ? renderNoHearts() : nextExercise(session) }, "DEVAM ET"));
     footer.replaceWith(fb);
-    fb.querySelector(".btn").focus();
+    fb.querySelector(".btn").focus({ preventScroll: true });
   }
 
   checkBtn.addEventListener("click", () => submit());
@@ -519,10 +597,13 @@ function nextExercise(session) {
   app.replaceChildren(
     el("div", { class: "screen lesson" },
       el("header", { class: "lesson-top" },
-        el("button", { class: "close", type: "button", title: "Çık", onclick: () => { if (confirm("Dersten çıkmak istiyor musun? İlerlemen kaybolacak.")) render(); } }, "✕"),
+        el("button", { class: "close", type: "button", title: "Dersten çık", "aria-label": "Dersten çık",
+          onclick: () => askConfirm("Dersten çıkılsın mı?", "Bu dersteki ilerlemen kaybolacak.", "Çık", "Devam et", () => { app.onkeydown = null; render(); }) }, "✕"),
         el("div", { class: "bar" }, el("div", { class: "fill", style: `width:${progressPct}%` })),
-        el("div", { class: "lesson-hearts" }, session.meta.practice ? "🏋️" : `❤️ ${state.hearts}`)),
+        el("div", { class: "lesson-hearts", title: session.meta.practice ? "Pratik: kalp kaybetmezsin" : "Kalpler" },
+          session.meta.practice ? icon("dumbbell") : [icon("heart"), el("span", { class: "hc" }, String(state.hearts))])),
       el("main", { class: "lesson-main" },
+        el("div", { class: "ex-kind" }, ex.kind),
         el("h2", { class: "ex-title" }, ex.title),
         body),
       footer));
@@ -531,6 +612,7 @@ function nextExercise(session) {
 
   // Klavye: Enter = kontrol / devam, 1-4 = seçenek
   app.onkeydown = (e) => {
+    if (document.querySelector(".modal-bg")) return;
     if (e.key === "Enter") {
       e.preventDefault();
       const btn = $(".lesson-footer .btn:not(.skip)");
@@ -569,19 +651,19 @@ function finishLesson(session) {
   const time = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}`;
   app.replaceChildren(
     el("div", { class: "screen center finish" },
-      el("div", { class: "big-emoji bounce" }, meta.practice ? "💪" : "🎉"),
+      fox("joy"),
       el("h1", {}, meta.practice ? "Pratik tamamlandı!" : "Ders tamamlandı!"),
       el("div", { class: "result-grid" },
-        el("div", { class: "result xp" }, el("small", {}, "XP"), el("strong", {}, `+${gained}`)),
-        el("div", { class: "result acc" }, el("small", {}, "Doğruluk"), el("strong", {}, `%${accuracy}`)),
-        el("div", { class: "result time" }, el("small", {}, "Süre"), el("strong", {}, time))),
-      el("p", {}, `🔥 ${state.streak} günlük seri`),
+        el("div", { class: "result r-xp" }, el("small", {}, "XP"), el("strong", {}, `+${gained}`)),
+        el("div", { class: "result r-acc" }, el("small", {}, "Doğruluk"), el("strong", {}, `%${accuracy}`)),
+        el("div", { class: "result r-time" }, el("small", {}, "Süre"), el("strong", {}, time))),
+      el("div", { class: "streak-pill" }, icon("flame"), `${state.streak} günlük seri`),
       el("button", { class: "btn", type: "button", onclick: render }, "DEVAM ET")));
   confetti();
 }
 
 function confetti() {
-  const colors = ["#58cc02", "#1cb0f6", "#ff9600", "#ff4b4b", "#ce82ff", "#ffc800"];
+  const colors = ["#ff7a2f", "#4b6cff", "#22b97b", "#f2545b", "#9b5cf6", "#ffb800"];
   for (let i = 0; i < 60; i++) {
     const p = el("div", { class: "confetti" });
     p.style.left = Math.random() * 100 + "vw";
